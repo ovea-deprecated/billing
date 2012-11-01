@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>ovea-billing</artifactId>
-    <version>1.1.b1-SNAPSHOT</version>
+    <version>1.0.b2-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>ovea-billing</name>
