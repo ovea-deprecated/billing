@@ -48,10 +48,47 @@ Body/startSubscriptionExtendedResponse/return/redirectUrl = > l'url que le clien
 
  Puis on update via le bus les authorization du member
 
+Attention de bien verifier qui appel le calback (le client ou MPULSE)
 
 ========================================================================================================================
 ========================================================================================================================
  FB ITEM -> Rest
 ========================================================================================================================
 
+On definit dans les options FB de l'APP une URL de callback http://service.jaxspot.net/api/billing/facebook
 
+
+Coté client on appel l'API de payement FB comme ca :
+function buy() {
+  var obj = {
+    method: 'pay',
+    action: 'buy_item',
+    order_info: SOME_DEV_JS_OBJECT_ORDER_INFO,
+    dev_purchase_params: {'oscif': true}
+  };
+
+  FB.ui(obj, js_callback);
+}
+
+N.B : on pourrait aussi faire un call direct
+https://www.facebook.com/dialog/pay?app_id=YOUR_APP_ID&redirect_uri=YOUR_REDIRECT_URI&action=buy_item&order_info=SOME_DEV_JSON_ORDER_INFO&dev_purchase_params={"oscif":true}
+
+
+FB nous appel une premiere fois sur l'URL de callback avec la methode 'payments_get_items' en nous passant le order_info (SOME_DEV_JS_OBJECT_ORDER_INFO)
+Nous devons repondre pas un json representant l'item a vendu.
+
+Ensuite le client suit le processus de paiement FB
+A la fin FB nous rapelle sur l'URL de callback avec la methode payments_status_update qui contient l'info sur l'état de l'achat
+
+C'est FB qui appel le callback et on a l'info du membre qui a realisé l'achat
+
+Puis on update via le bus les authorizations du member
+
+========================================================================================================================
+ FB SUBSCRIPTION -> Rest
+========================================================================================================================
+
+
+
+
+========================================================================================================================
