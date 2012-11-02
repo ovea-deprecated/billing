@@ -1,0 +1,57 @@
+========================================================================================================================
+MPULSE SUBSCRIPTION -> Web Service
+========================================================================================================================
+
+ Step1 - Demander l'URL de service
+
+ Cet appel est fait par l'URL /subscription/{provider}/service dans BillingResource
+
+ Le call SOAP associe est le suivant
+
+ <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:wap="http://billing.mpulse.eu/france/wapbilling">
+    <soapenv:Header/>
+    <soapenv:Body>
+        <wap:startSubscriptionExtended>
+            <name>settings.getString("mpulse.product")</name>
+            <ipAddress>clientIp</ipAddress>
+            <redirectUrl>settings.getString("mpulse.callback")?provider=mpulse</redirectUrl>
+            <alias></alias>
+            <operator>partner.code()</operator>
+            <reference>reference</reference>
+        </wap:startSubscriptionExtended>
+    </soapenv:Body>
+ </soapenv:Envelope>
+
+On passe une URL de callback
+
+le service renvois deux infos :
+
+Body/startSubscriptionExtendedResponse/return/id => l'id de la subscription
+Body/startSubscriptionExtendedResponse/return/redirectUrl = > l'url que le clien doit jouer
+
+
+ Step2 - Le client appel le service MPULSE avec l'URL en retour du call SOAP et fait le processus de paiement
+ qui nous renvois ensuite sur le callback /subscription/callback dans BillingResource
+
+ le id de la subscription est passe en parametre de la requete de callback (le tid).
+
+ Step3 - On verifit le status de la subscription
+
+ <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:wap="http://billing.mpulse.eu/france/wapbilling">
+    <soapenv:Header/>
+    <soapenv:Body>
+        <wap:getSubscriptionStatus>
+            <subscriptionId>subscriptionId</subscriptionId>
+        </wap:getSubscriptionStatus>
+    </soapenv:Body>
+ </soapenv:Envelope>
+
+ Puis on update via le bus les authorization du member
+
+
+========================================================================================================================
+========================================================================================================================
+ FB ITEM -> Rest
+========================================================================================================================
+
+
