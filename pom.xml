@@ -41,7 +41,7 @@
                 <artifactId>gmaven-plugin</artifactId>
                 <version>1.4</version>
                 <configuration>
-                    <source />
+                    <source/>
                     <providerSelection>2.0</providerSelection>
                     <sourceEncoding>UTF-8</sourceEncoding>
                     <targetBytecode>${jdk.version}</targetBytecode>
@@ -60,7 +60,7 @@
                     <dependency>
                         <groupId>org.codehaus.groovy</groupId>
                         <artifactId>groovy-all</artifactId>
-                        <version>2.0.1</version>
+                        <version>2.0.5</version>
                     </dependency>
                     <dependency>
                         <groupId>org.codehaus.gmaven.runtime</groupId>
@@ -85,35 +85,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.ovea.tadjin.module</groupId>
-            <artifactId>tadjin-util</artifactId>
-            <version>1.57.ga</version>
-        </dependency>
-        <dependency>
-            <groupId>com.ovea</groupId>
-            <artifactId>ovea-json</artifactId>
-            <version>2.0.ga</version>
-        </dependency>
-        <dependency>
-            <groupId>com.mycila.xmltool</groupId>
-            <artifactId>xmltool</artifactId>
-            <version>3.3</version>
-        </dependency>
-        <dependency>
-            <groupId>javax.inject</groupId>
-            <artifactId>javax.inject</artifactId>
-            <version>1</version>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>12.0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-            <version>1.5</version>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+            <version>2.0.5</version>
         </dependency>
     </dependencies>
 
