@@ -1,0 +1,159 @@
+
+Payment status – what does it mean?
+Active
+Cancelled
+Cleared
+Completed
+Denied
+Expired
+Failed
+Funds availablea
+Funds not yet available
+Held
+In progress
+Marked as paid
+On hold
+On hold – ship now
+Paid
+Pending
+Placed
+Refunded
+Refused
+Returned
+Reversed
+Temporary hold
+Unclaimed
+Uncleared
+Under review
+Active
+Subscriptions: You have automatic payments scheduled for this subscription.
+Back to top
+
+Cancelled
+Money requests: Either you or the sender cancelled the request.
+Payments sent: You cancelled the payment, and the money was refunded to your account.
+Subscriptions: The subscription was cancelled, and no more payments will be made.
+Back to Top
+
+Cleared
+Payments received: You received an eCheque payment, and the money is now in your account.
+Back to Top
+
+Completed
+Adding funds from your bank account: The transfer has been completed, and the money is in your account.
+Payments received: The transaction was successful, and the money is in your account.
+Payments sent: The recipient received your payment.
+Subscriptions: All payments for this subscription have been made.
+Withdrawals to your bank account: We have sent your money, and it should be in your bank account within a few business days.
+Back to top
+
+Denied
+Payments sent: The recipient decided not to accept your payment.
+Payments received: You decided not to accept the payment.
+Back to top
+
+Expired
+When you place an order: The transaction expired.
+Back to top
+
+Failed
+Payments sent: Your payment didn't go through.
+Back to top
+
+Funds available
+Previously unavailable funds from eBay sales that are now in your PayPal account and ready for use.
+Back to top
+
+Funds not yet available
+While you establish a successful sales history on eBay, in most cases, funds from eBay sales are available in 21 days.
+Learn more
+
+Back to top
+
+Held
+Payments received: The money is being held, pending reversal.
+Payments sent: The money is being held, pending reversal.
+Back to top
+
+In progress
+Payments sent: Your payment was sent, but the recipient hasn't accepted it yet.
+Back to top
+
+Marked as paid
+Marked as paid: Your payment was received, and your invoice is now paid in full.
+Back to top
+
+On hold
+Payments received: The money is being held temporarily. The sender may have filed a dispute, or we are reviewing the transaction.
+Payments sent: The money is on hold while you dispute the transaction.
+Withdrawals to your bank account: There’s a problem with your bank account, and your withdrawal couldn’t go through.
+Back to top
+
+On hold – ship now
+Payments received: The transaction is under a payment hold for an eBay item. Your funds will be released after 21 days. To get your payment sooner, please ship the merchandise right away.
+Back to top
+
+Paid
+Money requests: Either you or the recipient was paid the full amount.
+Back to top
+
+Pending
+Adding funds from your bank account: You requested a bank transfer. The money should be in your PayPal account soon.
+Money requests: The money request has not yet been paid. You can pay, edit, send a reminder, or cancel the request.
+Withdrawals to your bank account: You requested a transfer from PayPal to your bank account.
+Back to top
+
+Placed
+Part of your available PayPal balance is being held temporarily while this payment is processed. Once the purchase is complete, we'll release the hold and use the money for the payment.
+Back to top
+
+Processed
+Adding funds from your bank account: We have transferred your request to your bank. The money should be in your PayPal account shortly.
+Adding funds using personal checks: We received your check. The money will be available in your PayPal account in 4-5 business days.
+Back to top
+
+Refunded
+Refunded or Partially refunded: If you paid by debit or credit card, your refund will go to that card. Otherwise, your refund will go to your PayPal account.
+Payments sent: The recipient refunded your payment.
+Back to top
+
+Refused
+Adding funds from your bank account: Your bank transfer was rejected. We’ll email you why this happened.
+Payments sent: The recipient didn't receive your payment.
+Back to top
+
+Returned
+Payments sent: Your money was returned because the recipient didn't claim the payment within 30 days.
+Back to top
+
+Reversed
+Payments sent: Either you or PayPal cancelled the payment.
+Withdrawals to your bank account: The transfer was denied, and we credited the money back to your PayPal account. We’ll email you why this happened.
+Back to top
+
+Temporary hold
+Payments sent and received: A temporary hold may be placed on money during the authorization process. This process usually doesn't take long, and you'll see the status change to "Completed."
+Back to top
+
+Unclaimed
+Payments Sent: A payment may be unclaimed for several reasons:
+The recipient has not signed up for a PayPal account and has not yet received your payment.
+The recipient has a Personal account (which cannot receive more than 5 card-funded payments a year) and has not upgraded. Or the recipient hasn't accepted the payment.
+The recipient has a Premier or Business account and has chosen to individually accept or decline payments from customers who don't have a confirmed address.
+The money has been deducted from your PayPal account. You can cancel this payment by clicking Unclaimed and then Cancel Payment. Please note that all unclaimed transactions are automatically cancelled after 30 days.
+Back to top
+
+Uncleared
+Payments received: The eCheque payment is in process. We recommend you wait to ship until the payment clears.
+When you send a payment: The eCheque payment is in process.
+Back to top
+
+Under review
+Payments received: We are reviewing this transaction. Please don't ship until we complete our review.
+Back to top
+
+
+
+Close Window
+
+Copyright © 1999-2012 PayPal. All rights reserved.
