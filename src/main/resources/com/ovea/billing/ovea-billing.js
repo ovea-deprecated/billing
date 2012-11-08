@@ -58,17 +58,23 @@
                     success:function (data) {
                         if (data.error) {
                             trigger('buy.error', {
-                                message:data.error
+                                message:data.error,
+                                product:opts.product,
+                                platform:opts.using
                             });
                         } else if (data.redirect) {
                             trigger('redirect', {
-                                url:data.redirect
+                                url:data.redirect,
+                                product:opts.product,
+                                platform:opts.using
                             });
                         }
                     },
                     error:function (xhr) {
                         trigger('buy.error', {
-                            message:'http-status-' + xhr.status
+                            message:'http-status-' + xhr.status,
+                            product:opts.product,
+                            platform:opts.using
                         });
                     }
                 });
