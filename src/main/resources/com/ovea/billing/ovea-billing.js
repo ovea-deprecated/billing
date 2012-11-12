@@ -2,7 +2,10 @@
 (function ($) {
 
     window.Billing = function (opts) {
-        var def_handler, self, trigger, ready = false;
+        var def_handler, self, trigger, ready = false, conf = {
+            products:[],
+            platforms:[]
+        };
         def_handler = function (e) {
             switch (e.type) {
                 case 'ready':
@@ -33,19 +36,32 @@
         self = {
             options:$.extend({
                 url:'',
-                onevent:$.noop,
-                products:[],
-                platforms:[]
+                onevent:$.noop
             }, opts || {}),
             toString:function () {
-                return 'Billing@' + this.options.url;
+                return 'Billing{url=' + this.options.url + ', products=' + conf.products + ', platforms=' + conf.platforms + '}';
+            },
+            init:function () {
+                $.ajax({
+                    url:self.options.url + '/options',
+                    type:'POST',
+                    dataType:'json',
+                    data:{
+                        action:'options'
+                    },
+                    success:function (options) {
+                        conf = $.extend(conf, options || {});
+                        ready = true;
+                        trigger('ready');
+                    }
+                });
             },
             buy:function (opts) {
-                if (!ready) throw new Error("Not ready yet");
+                if (!ready) throw new Error("Not ready yet. Please call init() method first.");
                 if (!opts.product) throw new Error("Missing 'product' option to select product to buy");
                 if (!opts.using) throw new Error("Missing 'using' option to select billing platform");
-                if ($.inArray(opts.product, self.options.products) === -1) throw new Error("Bad product: " + opts.product + ". Supported products: " + self.options.products);
-                if ($.inArray(opts.using, self.options.platforms) === -1) throw new Error("Bad platform: " + opts.using + ". Supported platforms: " + self.options.platforms);
+                if ($.inArray(opts.product, conf.products) === -1) throw new Error("Bad product: " + opts.product + ". Supported products: " + conf.products);
+                if ($.inArray(opts.using, conf.platforms) === -1) throw new Error("Bad platform: " + opts.using + ". Supported platforms: " + conf.platforms);
                 $.ajax({
                     url:self.options.url + '/buy/' + opts.product + '/using/' + opts.using,
                     type:'POST',
@@ -65,6 +81,12 @@
                         } else if (data.redirect) {
                             trigger('redirect', {
                                 url:data.redirect,
+                                action:'buy',
+                                product:opts.product,
+                                platform:opts.using
+                            });
+                        } else {
+                            trigger('buy.success', {
                                 product:opts.product,
                                 platform:opts.using
                             });
@@ -80,26 +102,47 @@
                 });
             },
             cancel:function (opts) {
-                if (!ready) throw new Error("Not ready yet");
-                if (!opts.product) throw new Error("Missing 'product' option to select product to buy");
-                // mpulse: call backend, send redirect event if we get an url (or call canceled event), redirect if not return false or send error messsage
-                // url:options.ws.api + '/billing/subscription/' + provider + '/cancel'
+                if (!ready) throw new Error("Not ready yet. Please call init() method first.");
+                if (!opts.product) throw new Error("Missing 'product' option to select product to cancel");
+                $.ajax({
+                    url:self.options.url + '/cancel/' + opts.product,
+                    type:'POST',
+                    dataType:'json',
+                    data:{
+                        action:'cancel',
+                        product:opts.product
+                    },
+                    success:function (data) {
+                        if (data.error) {
+                            trigger('cancel.error', {
+                                message:data.error,
+                                product:opts.product
+                            });
+                        } else if (data.redirect) {
+                            trigger('redirect', {
+                                url:data.redirect,
+                                action:'cancel',
+                                product:opts.product
+                            });
+                        } else {
+                            trigger('cancel.success', {
+                                product:opts.product
+                            });
+                        }
+                    },
+                    error:function (xhr) {
+                        trigger('cancel.error', {
+                            message:'http-status-' + xhr.status,
+                            product:opts.product
+                        });
+                    }
+                });
             },
             isReady:function () {
                 return ready;
             }
         };
         if (!self.options.url) throw new Error('Missing billing service URL');
-        $.ajax({
-            url:self.options.url + '/options',
-            type:'GET',
-            dataType:'json',
-            success:function (options) {
-                $.extend(self.options, options);
-                ready = true;
-                trigger('ready');
-            }
-        });
         return self;
     };
 
