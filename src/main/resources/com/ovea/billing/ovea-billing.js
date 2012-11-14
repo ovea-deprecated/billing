@@ -16,7 +16,7 @@
                     break;
                 case 'buy.error':
                 case 'cancel.error':
-                    alert('Billing error: ' + e.message);
+                    alert('[billing] ' + e.type + ': ' + e.message);
                     break;
                 case 'buy.success':
                 case 'cancel.success':
@@ -94,7 +94,8 @@
                     },
                     error:function (xhr) {
                         trigger('buy.error', {
-                            message:'http-status-' + xhr.status,
+                            code:xhr.status,
+                            message:$.parseJSON(xhr.responseText).message,
                             product:opts.product,
                             platform:opts.using
                         });
@@ -132,7 +133,8 @@
                     },
                     error:function (xhr) {
                         trigger('cancel.error', {
-                            message:'http-status-' + xhr.status,
+                            code:xhr.status,
+                            message:$.parseJSON(xhr.responseText).message,
                             product:opts.product
                         });
                     }

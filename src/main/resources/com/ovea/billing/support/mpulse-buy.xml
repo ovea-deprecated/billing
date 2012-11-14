@@ -1,0 +1,13 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:wap="http://billing.mpulse.eu/france/wapbilling">
+    <soapenv:Header/>
+    <soapenv:Body>
+        <wap:startSubscriptionExtended>
+            <name>JAXSPOT</name>
+            <ipAddress>${event.data.from?:''}</ipAddress>
+            <redirectUrl>${event.data.callback?:''}</redirectUrl>
+            <alias></alias>
+            <operator>${event.data.operator?:''}</operator>
+            <reference>${event.data.reference?:''}</reference>
+        </wap:startSubscriptionExtended>
+    </soapenv:Body>
+</soapenv:Envelope>
