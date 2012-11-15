@@ -11,12 +11,11 @@ import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST
  */
 class BillingEvent {
 
-    String message = ''
     def data = [:]
     boolean prevented
 
     BillingEventType type
-    BillingPlatform platform
+    Collection<BillingPlatform> platforms = []
     String product
     HttpServletRequest request
     HttpServletResponse response
@@ -25,8 +24,7 @@ class BillingEvent {
 
     void prevent(String message = '') {
         prevented = true
-        this.message = message
-        IO.send response, SC_BAD_REQUEST, [message: message]
+        answer SC_BAD_REQUEST, [message: message]
     }
 
     void answer(data) {

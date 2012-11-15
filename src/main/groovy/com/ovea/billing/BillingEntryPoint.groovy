@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST
+import static javax.servlet.http.HttpServletResponse.SC_NO_CONTENT
 import static javax.servlet.http.HttpServletResponse.SC_OK
 
 /**
@@ -99,8 +100,14 @@ class BillingEntryPoint extends HttpServlet implements Filter {
             } else if (path.startsWith('/callback/')) {
                 event = handleCallback(path, req, resp)
             }
-            if (event && event.answer) {
-                IO.send resp, event.answer.status as int, event.answer.data
+            if (!resp.committed) {
+                if (event && event.answer) {
+                    IO.send resp, event.answer.status as int, event.answer.data
+                } else {
+                    IO.send resp, SC_NO_CONTENT
+                }
+            } else {
+                LOGGER.log(Level.FINE, 'Response already commited')
             }
         } catch (e) {
             LOGGER.log(Level.SEVERE, e.message, e)
@@ -110,8 +117,8 @@ class BillingEntryPoint extends HttpServlet implements Filter {
 
     BillingEvent handleCallback(String path, HttpServletRequest request, HttpServletResponse response) {
         BillingEvent event = new BillingEvent(
-            type: BillingEventType.CALLBACK,
-            platform: path.substring(10) as BillingPlatform,
+            type: BillingEventType.CALLBACK_REQUEST,
+            platforms: [path.substring(10) as BillingPlatform],
             request: request,
             response: response
         )
@@ -124,45 +131,18 @@ class BillingEntryPoint extends HttpServlet implements Filter {
 
     BillingEvent cancel(String product, HttpServletRequest request, HttpServletResponse response) {
         if (config.canCancel(product)) {
-            def platforms = config.platforms(product)
             BillingEvent e = new BillingEvent(
                 type: BillingEventType.CANCEL_REQUESTED,
                 product: product,
                 request: request,
-                response: response
-            )
-            if (platforms.size() == 1) {
-                e.platform = platforms[0] as BillingPlatform
-            }
-            connectors*.onEvent(e)
-            if (!e.prevented) {
-                callback.onEvent(e)
-                if (!e.prevented) {
-                    e.type = BillingEventType.CANCEL_ACCEPTED
-                    connectors*.onEvent(e)
-                }
-            }
-            return e
-        } else {
-            response.status = SC_BAD_REQUEST
-            return null
-        }
-    }
-
-    BillingEvent buy(String product, BillingPlatform platform, HttpServletRequest req, HttpServletResponse resp) {
-        if (config.canPay(product, platform)) {
-            BillingEvent e = new BillingEvent(
-                type: BillingEventType.BUY_REQUESTED,
-                product: product,
-                platform: BillingPlatform.mpulse,
-                request: req,
-                response: resp
+                response: response,
+                platforms: config.platforms(product)
             )
             connectors*.onEvent(e)
             if (!e.prevented) {
                 callback.onEvent(e)
                 if (!e.prevented) {
-                    e.type = BillingEventType.BUY_ACCEPTED
+                    e.type = BillingEventType.CANCEL_REQUEST_ACCEPTED
                     connectors*.onEvent(e)
                     if (!e.prevented) {
                         callback.onEvent(e)
@@ -170,10 +150,33 @@ class BillingEntryPoint extends HttpServlet implements Filter {
                 }
             }
             return e
-        } else {
-            resp.status = SC_BAD_REQUEST
-            return null
         }
+        throw new IllegalArgumentException('Cannot cancel product ' + product)
+    }
+
+    BillingEvent buy(String product, BillingPlatform platform, HttpServletRequest req, HttpServletResponse resp) {
+        if (config.canPay(product, platform)) {
+            BillingEvent e = new BillingEvent(
+                type: BillingEventType.BUY_REQUESTED,
+                product: product,
+                platforms: [platform],
+                request: req,
+                response: resp
+            )
+            connectors*.onEvent(e)
+            if (!e.prevented) {
+                callback.onEvent(e)
+                if (!e.prevented) {
+                    e.type = BillingEventType.BUY_REQUEST_ACCEPTED
+                    connectors*.onEvent(e)
+                    if (!e.prevented) {
+                        callback.onEvent(e)
+                    }
+                }
+            }
+            return e
+        }
+        throw new IllegalArgumentException('Cannot buy product ' + product)
     }
 
 }

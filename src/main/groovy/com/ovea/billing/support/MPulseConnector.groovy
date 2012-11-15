@@ -21,7 +21,9 @@ class MPulseConnector implements BillingCallback {
         url: 'http://gateway.mpulse.eu/wapbilling/france/basicauth',
         auth: '',
         tmpl: [
-            buy: new SimpleTemplateEngine().createTemplate(Resource.from('classpath:com/ovea/billing/support/mpulse-buy.xml').readAsString())
+            buy: new SimpleTemplateEngine().createTemplate(Resource.from('classpath:com/ovea/billing/support/mpulse-buy.xml').readAsString()),
+            status: new SimpleTemplateEngine().createTemplate(Resource.from('classpath:com/ovea/billing/support/mpulse-status.xml').readAsString()),
+            cancel: new SimpleTemplateEngine().createTemplate(Resource.from('classpath:com/ovea/billing/support/mpulse-cancel.xml').readAsString())
         ]
     ]
 
@@ -32,32 +34,97 @@ class MPulseConnector implements BillingCallback {
 
     @Override
     void onEvent(BillingEvent e) {
-        switch (e.type) {
-            case BillingEventType.BUY_REQUESTED:
-                e.data << [
-                    from: e.request.remoteAddr,
-                    callback: mpulse.callback
-                ]
-                break
-            case BillingEventType.BUY_ACCEPTED:
-                if (!e.data.reference) {
-                    throw new IllegalArgumentException('Missing reference')
-                }
-                def req = mpulse.tmpl.buy.make([
-                    event: e
-                ]).toString()
-                def res = IO.soapRequest(mpulse.url as String, req, [
-                    Host: 'gateway.mpulse.eu',
-                    Authorization: 'Basic ' + mpulse.auth
-                ])
-                e.data << [
-                    id: res.Body.startSubscriptionExtendedResponse.'return'.id as String,
-                    redirect: res.Body.startSubscriptionExtendedResponse.'return'.redirectUrl as String
-                ]
-                e.answer([
-                    redirect: e.data.redirect
-                ])
-                break
+        if (BillingPlatform.mpulse in e.platforms) {
+            switch (e.type) {
+
+                case BillingEventType.BUY_REQUESTED:
+                    e.data << [
+                        from: e.request.remoteAddr,
+                        callback: mpulse.callback
+                    ]
+                    break
+
+                case BillingEventType.BUY_REQUEST_ACCEPTED:
+                    if (!e.data.reference) {
+                        throw new IllegalArgumentException('Missing reference')
+                    }
+                    e.data << buy(e)
+                    e.answer([
+                        redirect: e.data.redirect
+                    ])
+                    e.type = BillingEventType.BUY_PENDING
+                    break
+
+                case BillingEventType.CANCEL_REQUEST_ACCEPTED:
+                    if (!e.data.id) {
+                        throw new IllegalArgumentException('Missing subscription id')
+                    }
+                    e.type = BillingEventType.CANCEL_COMPLETED
+                    e.data << status(e)
+                    if (e.data.status == 'ACTIVE') {
+                        e.data << cancel(e)
+                        if (e.data.redirect) {
+                            e.type = BillingEventType.CANCEL_PENDING
+                        }
+                    }
+                    e.answer([
+                        redirect: e.data.redirect
+                    ])
+                    break;
+
+                case BillingEventType.CALLBACK_REQUEST:
+                    e.data << [
+                        id: e.request.getParameter('tid')
+                    ]
+                    e.data << status(e)
+                    if (e.data.status == 'ACTIVE') {
+                        e.type = BillingEventType.CALLBACK_REQUEST_ACCEPTED
+                    }
+                    break
+            }
         }
+
     }
+
+    def buy(BillingEvent e) {
+        def req = mpulse.tmpl.buy.make([
+            event: e
+        ]).toString()
+        def res = IO.soapRequest(mpulse.url as String, req, [
+            Host: 'gateway.mpulse.eu',
+            Authorization: 'Basic ' + mpulse.auth
+        ])
+        return [
+            id: res.Body.startSubscriptionExtendedResponse.'return'.id as String,
+            redirect: res.Body.startSubscriptionExtendedResponse.'return'.redirectUrl as String
+        ]
+    }
+
+    def status(BillingEvent e) {
+        def req = mpulse.tmpl.status.make([
+            event: e
+        ]).toString()
+        def res = IO.soapRequest(mpulse.url as String, req, [
+            Host: 'gateway.mpulse.eu',
+            Authorization: 'Basic ' + mpulse.auth
+        ])
+        return [
+            // ACTIVE, CANCEL, STOPPED, PENDING
+            status: res.Body.getSubscriptionStatusResponse.'return'.status as String
+        ]
+    }
+
+    def cancel(BillingEvent e) {
+        def req = mpulse.tmpl.cancel.make([
+            event: e
+        ]).toString()
+        def res = IO.soapRequest(mpulse.url as String, req, [
+            Host: 'gateway.mpulse.eu',
+            Authorization: 'Basic ' + mpulse.auth
+        ])
+        return [
+            redirect: res?.Body?.cancelSubscriptionResponse?.'return'?.redirectUrl
+        ]
+    }
+
 }

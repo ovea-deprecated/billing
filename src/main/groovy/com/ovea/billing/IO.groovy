@@ -15,12 +15,16 @@ class IO {
 
     private static final Logger LOGGER = Logger.getLogger(IO.name)
 
-    static void send(HttpServletResponse resp, int status, data) {
-        def content = new JsonBuilder(data).toString().getBytes('UTF-8')
+    static void send(HttpServletResponse resp, int status, data = [:]) {
         resp.status = status
-        resp.contentLength = content.length
         resp.contentType = 'application/json;charset=utf-8'
-        resp.outputStream << content
+        if (data) {
+            def content = new JsonBuilder(data).toString().getBytes('UTF-8')
+            resp.contentLength = content.length
+            resp.outputStream << content
+        } else {
+            resp.contentLength = 0
+        }
     }
 
     static def soapRequest(String url, String request, Map<String, String> headers = [:]) throws WebServiceException {

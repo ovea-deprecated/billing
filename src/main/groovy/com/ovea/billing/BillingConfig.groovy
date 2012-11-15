@@ -76,8 +76,8 @@ class BillingConfig {
         }
     }
 
-    Collection<String> platforms(String product) {
-        return (json.products[product].platforms ?: [:]).keySet()
+    Collection<BillingPlatform> platforms(String product) {
+        return (json.products[product].platforms ?: [:]).keySet().collect {it as BillingPlatform}
     }
 
 }

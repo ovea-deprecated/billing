@@ -1,0 +1,8 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:wap="http://billing.mpulse.eu/france/wapbilling">
+    <soapenv:Header/>
+    <soapenv:Body>
+        <wap:getSubscriptionStatus>
+            <subscriptionId>${event.data.id}</subscriptionId>
+        </wap:getSubscriptionStatus>
+    </soapenv:Body>
+</soapenv:Envelope>
