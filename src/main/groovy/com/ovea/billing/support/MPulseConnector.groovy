@@ -1,14 +1,9 @@
 package com.ovea.billing.support
 
-import com.ovea.billing.BillingCallback
-import com.ovea.billing.BillingConfig
-import com.ovea.billing.BillingEvent
-import com.ovea.billing.BillingEventType
-import com.ovea.billing.BillingPlatform
-import com.ovea.billing.IO
 import com.ovea.tadjin.util.Resource
 import groovy.text.SimpleTemplateEngine
 import org.apache.commons.codec.binary.Base64
+import com.ovea.billing.*
 
 /**
  * @author Mathieu Carbou (mathieu.carbou@gmail.com)
@@ -76,9 +71,34 @@ class MPulseConnector implements BillingCallback {
                     e.data << [
                         id: e.request.getParameter('tid')
                     ]
+                    if (!e.data.id) {
+                        throw new IllegalArgumentException('Missing subscription id')
+                    }
                     e.data << status(e)
                     if (e.data.status == 'ACTIVE') {
                         e.type = BillingEventType.CALLBACK_REQUEST_ACCEPTED
+                    }
+                    break
+
+                case BillingEventType.RECOVER_REQUEST:
+                    if (!e.data.id) {
+                        throw new IllegalArgumentException('Missing subscription id')
+                    }
+                    e.data << status(e)
+                    if(e.data.status == 'ACTIVE') {
+                        e.type = BillingEventType.RECOVER_ACCEPTED
+                    }
+                    break
+
+                case BillingEventType.RENEWAL_REQUEST:
+                    if (!e.data.id) {
+                        throw new IllegalArgumentException('Missing subscription id')
+                    }
+                    e.data << status(e)
+                    if(e.data.status == 'ACTIVE') {
+                        e.type = BillingEventType.RENEWAL_ACCEPTED
+                    } else if(e.data.status in ['CANCEL', 'STOPPED']) {
+                        e.type = BillingEventType.RENEWAL_REJECTED
                     }
                     break
             }

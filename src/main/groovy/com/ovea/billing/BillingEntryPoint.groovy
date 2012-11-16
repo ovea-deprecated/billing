@@ -6,36 +6,24 @@ import java.util.logging.Level
 import java.util.logging.Logger
 import javax.inject.Inject
 import javax.inject.Singleton
-import javax.servlet.Filter
-import javax.servlet.FilterConfig
 import javax.servlet.ServletConfig
-import javax.servlet.ServletContext
-import javax.servlet.ServletRequest
-import javax.servlet.ServletResponse
 import javax.servlet.http.HttpServlet
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST
-import static javax.servlet.http.HttpServletResponse.SC_NO_CONTENT
-import static javax.servlet.http.HttpServletResponse.SC_OK
+import static javax.servlet.http.HttpServletResponse.*
 
 /**
  * @author Mathieu Carbou (mathieu.carbou@gmail.com)
  * @date 2012-11-06
  */
 @Singleton
-class BillingEntryPoint extends HttpServlet implements Filter {
+class BillingEntryPoint extends HttpServlet implements BillingService {
 
-    private static final String FILTERED = BillingEntryPoint.name + '.FILTERED'
     private static final Logger LOGGER = Logger.getLogger(BillingEntryPoint.name)
 
     public static final String CONFIG = 'config'
     public static final String URL = 'url'
-
-    BillingConfig config
-    ServletContext servletContext
-    Collection<BillingCallback> connectors = []
 
     @Inject
     BillingCallback callback
@@ -43,30 +31,25 @@ class BillingEntryPoint extends HttpServlet implements Filter {
     @Inject
     PropertySettings env
 
+    private BillingConfig config
+    private Collection<BillingCallback> connectors = []
+
     @Override
     void init(ServletConfig config) {
-        servletContext = config.servletContext
         super.init(config)
-        init(config.getInitParameter(CONFIG), config.getInitParameter(BillingEntryPoint.URL))
+        String configLocation = config.getInitParameter(CONFIG)
+        String url = config.getInitParameter(BillingEntryPoint.URL)
+        LOGGER.fine('init... ' + configLocation)
+        this.config = new BillingConfig(configLocation, env, url)
+        this.connectors = this.config.connectors
+        this.config.scheduler.start()
     }
 
     @Override
-    void init(FilterConfig filterConfig) {
-        servletContext = filterConfig.servletContext
-        init(filterConfig.getInitParameter(CONFIG), filterConfig.getInitParameter(BillingEntryPoint.URL))
-    }
-
-    void init(String configLocation, String url) {
-        LOGGER.fine('init: ' + configLocation)
-        config = new BillingConfig(configLocation, env, url)
-        connectors = config.connectors
-    }
-
-    @Override
-    void doFilter(ServletRequest request, ServletResponse response, javax.servlet.FilterChain chain) {
-        request.setAttribute(FILTERED, 'true')
-        doPost((HttpServletRequest) request, (HttpServletResponse) response)
-        chain.doFilter(request, response)
+    void destroy() {
+        LOGGER.fine('shutdown...')
+        this.config.scheduler.shutdown()
+        super.destroy()
     }
 
     @Override
@@ -179,4 +162,11 @@ class BillingEntryPoint extends HttpServlet implements Filter {
         throw new IllegalArgumentException('Cannot buy product ' + product)
     }
 
+    @Override
+    void fireEvent(BillingEvent e) {
+        connectors*.onEvent(e)
+        if (!e.prevented) {
+            callback.onEvent(e)
+        }
+    }
 }
