@@ -25,6 +25,8 @@ import com.ovea.tadjin.util.Resource
 import groovy.text.SimpleTemplateEngine
 import org.apache.commons.codec.binary.Base64
 
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 import java.util.logging.Logger
 
 /**
@@ -91,6 +93,18 @@ class MPulseConnector implements BillingCallback {
                     e.answer([
                         redirect: e.data.redirect
                     ])
+                    break;
+
+                case BillingEventType.CANCEL_OPERATOR:
+                    if (!e.data.id) {
+                        throw new IllegalArgumentException('Missing subscription id')
+                    }
+                    try {
+                        e.data << waitFor(e, ['CANCEL', 'STOPPED'], 3, 3, TimeUnit.SECONDS)
+                        e.type = BillingEventType.CANCEL_COMPLETED
+                    } catch (TimeoutException ignored) {
+                        e.type = BillingEventType.CANCEL_OPERATOR_PENDING
+                    }
                     break;
 
                 case BillingEventType.CALLBACK_REQUEST:
@@ -177,4 +191,14 @@ class MPulseConnector implements BillingCallback {
         ]
     }
 
+    def waitFor(BillingEvent e, Collection<String> expected, int retries, long waitTIme, TimeUnit unit) throws TimeoutException, InterruptedException {
+        for (int i = 0; i < retries; i++) {
+            Thread.sleep(unit.toMillis(waitTIme));
+            def data = status(e)
+            if (data.data in expected) {
+                return data;
+            }
+        }
+        throw new TimeoutException("Unable to get expected status (" + expected + ") from MPULSE event=" + e);
+    }
 }
