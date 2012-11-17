@@ -1,15 +1,24 @@
 package com.ovea.billing.support
 
+import com.ovea.billing.BillingCallback
+import com.ovea.billing.BillingConfig
+import com.ovea.billing.BillingEvent
+import com.ovea.billing.BillingEventType
+import com.ovea.billing.BillingPlatform
+import com.ovea.billing.IO
 import com.ovea.tadjin.util.Resource
 import groovy.text.SimpleTemplateEngine
 import org.apache.commons.codec.binary.Base64
-import com.ovea.billing.*
+
+import java.util.logging.Logger
 
 /**
  * @author Mathieu Carbou (mathieu.carbou@gmail.com)
  * @date 2012-11-13
  */
 class MPulseConnector implements BillingCallback {
+
+    private static final Logger LOGGER = Logger.getLogger(MPulseConnector.name)
 
     final def mpulse = [
         callback: '',
@@ -29,6 +38,8 @@ class MPulseConnector implements BillingCallback {
 
     @Override
     void onEvent(BillingEvent e) {
+        LOGGER.fine('onEvent: ' + e)
+
         if (BillingPlatform.mpulse in e.platforms) {
             switch (e.type) {
 
@@ -76,7 +87,11 @@ class MPulseConnector implements BillingCallback {
                     }
                     e.data << status(e)
                     if (e.data.status == 'ACTIVE') {
-                        e.type = BillingEventType.CALLBACK_REQUEST_ACCEPTED
+                        e.type = BillingEventType.CALLBACK_BUY_ACCEPTED
+                    } else if (e.data.status == 'PENDING') {
+                        e.type = BillingEventType.CALLBACK_BUY_PENDING
+                    } else if (e.data.status in ['CANCEL', 'STOPPED']) {
+                        e.type = BillingEventType.CALLBACK_BUY_REJECTED
                     }
                     break
 
@@ -85,7 +100,7 @@ class MPulseConnector implements BillingCallback {
                         throw new IllegalArgumentException('Missing subscription id')
                     }
                     e.data << status(e)
-                    if(e.data.status == 'ACTIVE') {
+                    if (e.data.status == 'ACTIVE') {
                         e.type = BillingEventType.RECOVER_ACCEPTED
                     }
                     break
@@ -95,9 +110,9 @@ class MPulseConnector implements BillingCallback {
                         throw new IllegalArgumentException('Missing subscription id')
                     }
                     e.data << status(e)
-                    if(e.data.status == 'ACTIVE') {
+                    if (e.data.status == 'ACTIVE') {
                         e.type = BillingEventType.RENEWAL_ACCEPTED
-                    } else if(e.data.status in ['CANCEL', 'STOPPED']) {
+                    } else if (e.data.status in ['CANCEL', 'STOPPED']) {
                         e.type = BillingEventType.RENEWAL_REJECTED
                     }
                     break
@@ -143,7 +158,7 @@ class MPulseConnector implements BillingCallback {
             Authorization: 'Basic ' + mpulse.auth
         ])
         return [
-            redirect: res?.Body?.cancelSubscriptionResponse?.'return'?.redirectUrl
+            redirect: res.Body.cancelSubscriptionResponse.'return'.redirectUrl as String
         ]
     }
 

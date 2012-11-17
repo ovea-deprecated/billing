@@ -79,7 +79,7 @@
                                 platform:opts.using
                             });
                         } else if (data.redirect) {
-                            trigger('redirect', {
+                            trigger('buy.redirect', {
                                 url:data.redirect,
                                 action:'buy',
                                 product:opts.product,
@@ -120,7 +120,7 @@
                                 product:opts.product
                             });
                         } else if (data.redirect) {
-                            trigger('redirect', {
+                            trigger('cancel.redirect', {
                                 url:data.redirect,
                                 action:'cancel',
                                 product:opts.product

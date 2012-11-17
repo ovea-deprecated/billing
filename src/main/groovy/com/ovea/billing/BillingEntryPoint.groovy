@@ -11,7 +11,9 @@ import javax.servlet.http.HttpServlet
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-import static javax.servlet.http.HttpServletResponse.*
+import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST
+import static javax.servlet.http.HttpServletResponse.SC_NO_CONTENT
+import static javax.servlet.http.HttpServletResponse.SC_OK
 
 /**
  * @author Mathieu Carbou (mathieu.carbou@gmail.com)
@@ -90,7 +92,7 @@ class BillingEntryPoint extends HttpServlet implements BillingService {
                     IO.send resp, SC_NO_CONTENT
                 }
             } else {
-                LOGGER.log(Level.FINE, 'Response already commited')
+                LOGGER.log(Level.FINEST, 'Response already commited with code: ' + resp.status)
             }
         } catch (e) {
             LOGGER.log(Level.SEVERE, e.message, e)

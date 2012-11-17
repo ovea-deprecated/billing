@@ -1,5 +1,7 @@
 package com.ovea.billing
 
+import groovy.transform.ToString
+
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -9,6 +11,7 @@ import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST
  * @author Mathieu Carbou (mathieu.carbou@gmail.com)
  * @date 2012-11-13
  */
+@ToString(excludes = ['request', 'response'], includeNames = true, ignoreNulls = true)
 class BillingEvent {
 
     def data = [:]

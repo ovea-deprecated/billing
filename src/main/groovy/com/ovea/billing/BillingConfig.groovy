@@ -6,13 +6,18 @@ import com.ovea.billing.support.PayPalConnector
 import com.ovea.tadjin.util.Resource
 import com.ovea.tadjin.util.properties.PropertySettings
 import groovy.json.JsonSlurper
+import org.quartz.DisallowConcurrentExecution
+import org.quartz.InterruptableJob
+import org.quartz.JobDataMap
+import org.quartz.JobExecutionContext
+import org.quartz.JobExecutionException
+import org.quartz.Scheduler
+import org.quartz.UnableToInterruptJobException
 import org.quartz.impl.StdSchedulerFactory
 
 import java.util.concurrent.atomic.AtomicReference
 import java.util.logging.Level
 import java.util.logging.Logger
-
-import org.quartz.*
 
 import static org.quartz.CronScheduleBuilder.cronSchedule
 import static org.quartz.JobBuilder.newJob
@@ -92,7 +97,7 @@ class BillingConfig {
     }
 
     boolean canPay(String product, BillingPlatform platform) {
-        return supportPlatform(platform) && supportProduct(product) && (json.products[product].platforms ?: [:]).containsKey(platform)
+        return supportPlatform(platform) && supportProduct(product) && (json.products[product].platforms ?: [:]).containsKey(platform.name())
     }
 
     boolean canCancel(String product) {

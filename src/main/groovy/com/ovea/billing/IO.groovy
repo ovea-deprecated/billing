@@ -50,6 +50,7 @@ class IO {
             def soapEnv = null
             switch (contentType[0]) {
                 case 'application/soap+xml':
+                case 'text/xml':
                     soapEnv = new XmlSlurper(false, true).parseText(response)
                     break
                 case 'multipart/related':
@@ -57,9 +58,9 @@ class IO {
                     soapEnv = new XmlSlurper(false, true).parseText(response)
                     break
                 default:
-                    throw new IllegalStateException('Unsupported Content-Type: ' + connection.getHeaderField('Content-Type'))
+                    throw new IllegalStateException('Unsupported Content-Type: ' + contentType)
             }
-            if (soapEnv?.Body?.Fault) {
+            if (soapEnv.Body.Fault.faultstring as String) {
                 throw new WebServiceException(soapEnv.Body.Fault.faultstring as String)
             }
             if (connection.responseCode != 200) {
