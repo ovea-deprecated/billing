@@ -80,6 +80,33 @@
                     </dependency>
                 </dependencies>
             </plugin>
+            <plugin>
+                <groupId>com.mycila.maven-license-plugin</groupId>
+                <artifactId>maven-license-plugin</artifactId>
+                <version>1.9.0</version>
+                <configuration>
+                    <header>https://github.com/Ovea/testatoo-license/raw/master/LICENSE</header>
+                    <strictCheck>true</strictCheck>
+                    <properties>
+                        <owner>Ovea</owner>
+                        <year>${project.inceptionYear}</year>
+                        <email>dev@ovea.com</email>
+                    </properties>
+                    <excludes>
+                        <exclude>README.md</exclude>
+                        <exclude>src/main/resources/**</exclude>
+                        <exclude>tmp/**</exclude>
+                        <exclude>**/.gitignore</exclude>
+                        <exclude>**/jndi.properties</exclude>
+                        <exclude>**/logging.properties</exclude>
+                        <exclude>**/*.js</exclude>
+                        <exclude>**/*.swf</exclude>
+                        <exclude>.idea/**</exclude>
+                        <exclude>**/*.md</exclude>
+                        <exclude>**/pom.xml.releaseBackup</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
