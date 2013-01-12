@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>ovea-billing</artifactId>
-    <version>1.0.b4-SNAPSHOT</version>
+    <version>1.0.b4</version>
     <packaging>jar</packaging>
 
     <name>ovea-billing</name>
@@ -41,7 +41,7 @@
                 <artifactId>gmaven-plugin</artifactId>
                 <version>1.4</version>
                 <configuration>
-                    <source/>
+                    <source />
                     <providerSelection>2.0</providerSelection>
                     <sourceEncoding>UTF-8</sourceEncoding>
                     <targetBytecode>${jdk.version}</targetBytecode>
