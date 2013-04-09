@@ -103,8 +103,12 @@ class BillingConfig {
         return json.platforms[platform.name()] ?: [:]
     }
 
+    def getProductConfig(String product) {
+        return json.products?."${product}" ?: [:]
+    }
+
     def getProductConfig(BillingPlatform platform, String product) {
-        return json.products?."${product}"?.platforms."${platform.name()}" ?: [:]
+        return getProductConfig(product).platforms."${platform.name()}" ?: [:]
     }
 
     boolean supportPlatform(BillingPlatform platform) {

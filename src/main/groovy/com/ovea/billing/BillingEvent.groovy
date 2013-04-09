@@ -33,7 +33,7 @@ class BillingEvent {
     boolean prevented
 
     BillingEventType type
-    Collection<BillingPlatform> platforms = []
+    List<BillingPlatform> platforms = []
     String product
     HttpServletRequest request
     HttpServletResponse response

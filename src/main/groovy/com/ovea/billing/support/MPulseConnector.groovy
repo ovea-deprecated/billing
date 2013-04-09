@@ -15,12 +15,7 @@
  */
 package com.ovea.billing.support
 
-import com.ovea.billing.BillingCallback
-import com.ovea.billing.BillingConfig
-import com.ovea.billing.BillingEvent
-import com.ovea.billing.BillingEventType
-import com.ovea.billing.BillingPlatform
-import com.ovea.billing.IO
+import com.ovea.billing.*
 import com.ovea.tadjin.util.Resource
 import groovy.text.SimpleTemplateEngine
 import org.apache.commons.codec.binary.Base64
@@ -110,7 +105,8 @@ class MPulseConnector implements BillingCallback {
 
                 case BillingEventType.CALLBACK_REQUEST:
                     e.data << [
-                        id: e.request.getParameter('tid')
+                        id: e.request.getParameter('tid'),
+                        period: config.getProductConfig(e.product).period
                     ]
                     if (!e.data.id) {
                         throw new IllegalArgumentException('Missing subscription id')
