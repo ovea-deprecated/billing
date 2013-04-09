@@ -46,7 +46,7 @@ class MPulseConnector implements BillingCallback {
     MPulseConnector(BillingConfig config) {
         def pcfg = config.getPlatformConfig(BillingPlatform.mpulse)
         mpulse.callback = config.url + mpulse.callback
-        mpulse.auth = Base64.encodeBase64String("${pcfg.username}:${pcfg.password}".bytes)
+        mpulse.auth = Base64.encodeBase64String("${pcfg.username}:${pcfg.password}".toString().bytes)
     }
 
     @Override
