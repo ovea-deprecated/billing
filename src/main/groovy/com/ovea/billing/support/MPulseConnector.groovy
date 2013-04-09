@@ -1,7 +1,7 @@
 /**
  * Copyright (C) 2011 Ovea <dev@ovea.com>
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -74,35 +74,6 @@ class MPulseConnector implements BillingCallback {
                     e.type = BillingEventType.BUY_PENDING
                     break
 
-                case BillingEventType.CANCEL_REQUEST_ACCEPTED:
-                    if (!e.data.id) {
-                        throw new IllegalArgumentException('Missing subscription id')
-                    }
-                    e.type = BillingEventType.CANCEL_COMPLETED
-                    e.data << status(e)
-                    if (e.data.status == 'ACTIVE') {
-                        e.data << cancel(e)
-                        if (e.data.redirect) {
-                            e.type = BillingEventType.CANCEL_PENDING
-                        }
-                    }
-                    e.answer([
-                        redirect: e.data.redirect
-                    ])
-                    break;
-
-                case BillingEventType.CANCEL_OPERATOR:
-                    if (!e.data.id) {
-                        throw new IllegalArgumentException('Missing subscription id')
-                    }
-                    try {
-                        e.data << waitFor(e, ['CANCEL', 'STOPPED'], 3, 3, TimeUnit.SECONDS)
-                        e.type = BillingEventType.CANCEL_COMPLETED
-                    } catch (TimeoutException ignored) {
-                        e.type = BillingEventType.CANCEL_OPERATOR_PENDING
-                    }
-                    break;
-
                 case BillingEventType.CALLBACK_REQUEST:
                     e.data << [
                         id: e.request.getParameter('tid'),
@@ -118,6 +89,35 @@ class MPulseConnector implements BillingCallback {
                         e.type = BillingEventType.CALLBACK_BUY_PENDING
                     } else if (e.data.status in ['CANCEL', 'STOPPED']) {
                         e.type = BillingEventType.CALLBACK_BUY_REJECTED
+                    }
+                    break
+
+                case BillingEventType.CANCEL_REQUEST_ACCEPTED:
+                    if (!e.data.id) {
+                        throw new IllegalArgumentException('Missing subscription id')
+                    }
+                    e.type = BillingEventType.CANCEL_COMPLETED
+                    e.data << status(e)
+                    if (e.data.status == 'ACTIVE') {
+                        e.data << cancel(e)
+                        if (e.data.redirect) {
+                            e.type = BillingEventType.CANCEL_PENDING
+                        }
+                    }
+                    e.answer([
+                        redirect: e.data.redirect
+                    ])
+                    break
+
+                case BillingEventType.CANCEL_OPERATOR:
+                    if (!e.data.id) {
+                        throw new IllegalArgumentException('Missing subscription id')
+                    }
+                    try {
+                        e.data << waitFor(e, ['CANCEL', 'STOPPED'], 3, 3, TimeUnit.SECONDS)
+                        e.type = BillingEventType.CANCEL_COMPLETED
+                    } catch (TimeoutException ignored) {
+                        e.type = BillingEventType.CANCEL_OPERATOR_PENDING
                     }
                     break
 
@@ -190,12 +190,12 @@ class MPulseConnector implements BillingCallback {
 
     def waitFor(BillingEvent e, Collection<String> expected, int retries, long waitTIme, TimeUnit unit) throws TimeoutException, InterruptedException {
         for (int i = 0; i < retries; i++) {
-            Thread.sleep(unit.toMillis(waitTIme));
+            Thread.sleep(unit.toMillis(waitTIme))
             def data = status(e)
             if (data.data in expected) {
-                return data;
+                return data
             }
         }
-        throw new TimeoutException("Unable to get expected status (" + expected + ") from MPULSE event=" + e);
+        throw new TimeoutException("Unable to get expected status (" + expected + ") from MPULSE event=" + e)
     }
 }

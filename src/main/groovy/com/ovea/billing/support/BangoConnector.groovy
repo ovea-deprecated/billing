@@ -1,7 +1,7 @@
 /**
  * Copyright (C) 2011 Ovea <dev@ovea.com>
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -17,8 +17,6 @@ package com.ovea.billing.support
 
 import com.ovea.billing.*
 
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeoutException
 import java.util.logging.Logger
 
 /**
@@ -79,17 +77,18 @@ class BangoConnector implements BillingCallback {
                         throw new IllegalArgumentException('Missing subscription id')
                     }
                     e.type = BillingEventType.CANCEL_COMPLETED
-                    e.data << status(e)
+                    //TODO - call bango
+                    /*e.data << status(e)
                     if (e.data.status == 'ACTIVE') {
                         e.data << cancel(e)
                         if (e.data.redirect) {
                             e.type = BillingEventType.CANCEL_PENDING
                         }
-                    }
+                    }*/
                     e.answer([
                         redirect: e.data.redirect
                     ])
-                    break;
+                    break
             }
         }
 
