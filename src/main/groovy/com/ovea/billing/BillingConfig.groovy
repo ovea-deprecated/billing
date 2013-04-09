@@ -15,19 +15,15 @@
  */
 package com.ovea.billing
 
+import com.ovea.billing.support.BangoConnector
 import com.ovea.billing.support.FacebookConnector
 import com.ovea.billing.support.MPulseConnector
 import com.ovea.billing.support.PayPalConnector
 import com.ovea.tadjin.util.Resource
 import com.ovea.tadjin.util.properties.PropertySettings
 import groovy.json.JsonSlurper
-import org.quartz.DisallowConcurrentExecution
-import org.quartz.InterruptableJob
-import org.quartz.JobDataMap
-import org.quartz.JobExecutionContext
-import org.quartz.JobExecutionException
-import org.quartz.Scheduler
-import org.quartz.UnableToInterruptJobException
+import groovy.text.SimpleTemplateEngine
+import org.quartz.*
 import org.quartz.impl.StdSchedulerFactory
 
 import java.util.concurrent.atomic.AtomicReference
@@ -46,36 +42,36 @@ class BillingConfig {
 
     private static final Logger LOGGER = Logger.getLogger(BillingConfig.name)
 
-    PropertySettings env
-    def json
-    String url
-    Scheduler scheduler
-    Collection<BillingCallback> connectors = []
+    private final def json
+    final String url
+    final Scheduler scheduler
+    final Collection<BillingCallback> connectors = []
 
     BillingConfig(String configLocation, PropertySettings env, String url) throws IllegalBillingConfigException {
-        this.env = env
         this.url = url
         this.scheduler = new StdSchedulerFactory().scheduler
         Resource r = Resource.from(configLocation)
         if (!r.exist()) {
             throw new IllegalArgumentException('Missing configLocation: ' + configLocation)
         }
-        this.json = new JsonSlurper().parseText(r.readAsString())
+        Map ctx = (env.properties + System.getenv() + System.properties) as TreeMap
+        this.json = new JsonSlurper().parseText(new SimpleTemplateEngine().createTemplate(r.readAsString()).make(ctx) as String)
         if (!productIds) {
             LOGGER.warning('No products defines in ' + configLocation)
         }
         if (!platformIds) {
             LOGGER.warning('No billing platforms defines in ' + configLocation)
         }
-        platformIds.findAll {!BillingPlatform.from(it)}.with {if (it) throw new IllegalBillingConfigException('Unsupported platforms: ' + it); it}
-        json.products.each {p, o ->
-            (o.platforms ?: [:]).keySet().findAll {!(it in platformIds)}.with {if (it) throw new IllegalBillingConfigException('Unsupported platforms: ' + it + ' for product ' + p); it}
+        platformIds.findAll { !BillingPlatform.from(it) }.with { if (it) throw new IllegalBillingConfigException('Unsupported platforms: ' + it); it }
+        json.products.each { p, o ->
+            (o.platforms ?: [:]).keySet().findAll { !(it in platformIds) }.with { if (it) throw new IllegalBillingConfigException('Unsupported platforms: ' + it + ' for product ' + p); it }
         }
-        this.connectors = BillingPlatform.values().findAll {BillingPlatform e -> e.name() in platformIds}.collect {
+        this.connectors = BillingPlatform.values().findAll { BillingPlatform e -> e.name() in platformIds }.collect {
             switch (it) {
                 case BillingPlatform.facebook: return new FacebookConnector(this)
                 case BillingPlatform.mpulse: return new MPulseConnector(this)
                 case BillingPlatform.paypal: return new PayPalConnector(this)
+                case BillingPlatform.bango: return new BangoConnector(this)
             }
             throw new AssertionError()
         }
@@ -103,6 +99,14 @@ class BillingConfig {
         return json.platforms?.keySet()
     }
 
+    def getPlatformConfig(BillingPlatform platform) {
+        return json.platforms[platform.name()] ?: [:]
+    }
+
+    def getProductConfig(BillingPlatform platform, String product) {
+        return json.products?."${product}"?.platforms."${platform.name()}" ?: [:]
+    }
+
     boolean supportPlatform(BillingPlatform platform) {
         return platform.name() in platformIds
     }
@@ -120,7 +124,7 @@ class BillingConfig {
     }
 
     Collection<BillingPlatform> platforms(String product) {
-        return (json.products[product].platforms ?: [:]).keySet().collect {it as BillingPlatform}
+        return (json.products[product].platforms ?: [:]).keySet().collect { it as BillingPlatform }
     }
 
     @DisallowConcurrentExecution

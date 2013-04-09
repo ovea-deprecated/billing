@@ -19,12 +19,13 @@ enum BillingPlatform {
 
     facebook,
     paypal,
-    mpulse
+    mpulse,
+    bango
 
     static BillingPlatform from(String platform) {
         try {
-            return BillingPlatform.valueOf(BillingPlatform, platform)
-        } catch (e) {
+            return BillingPlatform.valueOf(platform)
+        } catch (ignored) {
             return null
         }
     }
