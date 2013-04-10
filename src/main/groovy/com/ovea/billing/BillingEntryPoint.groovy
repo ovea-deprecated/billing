@@ -118,7 +118,7 @@ class BillingEntryPoint extends HttpServlet implements BillingService {
     BillingEvent handleCallback(String path, HttpServletRequest request, HttpServletResponse response) {
         BillingEvent event = new BillingEvent(
             type: BillingEventType.CALLBACK_REQUEST,
-            platforms: [path.substring(10) as BillingPlatform],
+            platform: path.substring(10) as BillingPlatform,
             request: request,
             response: response
         )
@@ -135,8 +135,7 @@ class BillingEntryPoint extends HttpServlet implements BillingService {
                 type: BillingEventType.CANCEL_REQUESTED,
                 product: product,
                 request: request,
-                response: response,
-                platforms: config.platforms(product)
+                response: response
             )
             connectors*.onEvent(e)
             if (!e.prevented) {
@@ -159,7 +158,7 @@ class BillingEntryPoint extends HttpServlet implements BillingService {
             BillingEvent e = new BillingEvent(
                 type: BillingEventType.BUY_REQUESTED,
                 product: product,
-                platforms: [platform],
+                platform: platform,
                 request: req,
                 response: resp
             )

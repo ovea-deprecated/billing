@@ -32,7 +32,8 @@ class MPulseConnector implements BillingCallback {
 
     private static final Logger LOGGER = Logger.getLogger(MPulseConnector.name)
 
-    final def mpulse = [
+    private final BillingConfig config
+    private final def mpulse = [
         callback: '/callback/' + BillingPlatform.mpulse,
         url: 'http://gateway.mpulse.eu/wapbilling/france/basicauth',
         auth: '',
@@ -44,6 +45,7 @@ class MPulseConnector implements BillingCallback {
     ]
 
     MPulseConnector(BillingConfig config) {
+        this.config = config
         def pcfg = config.getPlatformConfig(BillingPlatform.mpulse)
         mpulse.callback = config.url + mpulse.callback
         mpulse.auth = Base64.encodeBase64String("${pcfg.username}:${pcfg.password}".toString().bytes)
@@ -53,7 +55,7 @@ class MPulseConnector implements BillingCallback {
     void onEvent(BillingEvent e) {
         LOGGER.fine('onEvent: ' + e)
 
-        if (BillingPlatform.mpulse in e.platforms) {
+        if (BillingPlatform.mpulse == e.platform) {
             switch (e.type) {
 
                 case BillingEventType.BUY_REQUESTED:
