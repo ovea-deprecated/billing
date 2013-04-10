@@ -33,15 +33,15 @@ class BangoConnector implements BillingCallback {
     ]
 
     BangoConnector(BillingConfig config) {
-        bango.callback = config.url + bango.callback
         this.config = config
+        bango.callback = config.url + bango.callback
     }
 
     @Override
     void onEvent(BillingEvent e) {
         LOGGER.fine('onEvent: ' + e)
 
-        if (BillingPlatform.bango in e.platforms) {
+        if (BillingPlatform.bango == e.platform) {
             switch (e.type) {
 
                 case BillingEventType.BUY_REQUESTED:
