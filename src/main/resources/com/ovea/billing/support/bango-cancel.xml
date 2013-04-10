@@ -1,0 +1,12 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:com="com.bango.webservices.subscriptions">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <com:CancelSubscription>
+         <com:request>
+             <com:username>${username}</com:username>
+             <com:password>${password}</com:password>
+             <com:subscriptionId>${event.data.id}</com:subscriptionId>
+         </com:request>
+      </com:CancelSubscription>
+   </soapenv:Body>
+</soapenv:Envelope>
