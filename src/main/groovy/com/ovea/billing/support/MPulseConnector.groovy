@@ -85,12 +85,16 @@ class MPulseConnector implements BillingCallback {
                         throw new IllegalArgumentException('Missing subscription id')
                     }
                     e.data << status(e)
-                    if (e.data.status == 'ACTIVE') {
-                        e.type = BillingEventType.CALLBACK_BUY_ACCEPTED
-                    } else if (e.data.status == 'PENDING') {
-                        e.type = BillingEventType.CALLBACK_BUY_PENDING
-                    } else if (e.data.status in ['CANCEL', 'STOPPED']) {
-                        e.type = BillingEventType.CALLBACK_BUY_REJECTED
+                    switch (e.data.status) {
+                        case 'ACTIVE':
+                            e.type = BillingEventType.CALLBACK_BUY_ACCEPTED
+                            break
+                        case 'PENDING':
+                            e.type = BillingEventType.CALLBACK_BUY_PENDING
+                            break
+                        default:
+                            e.type = BillingEventType.CALLBACK_BUY_REJECTED
+                            break
                     }
                     break
 
