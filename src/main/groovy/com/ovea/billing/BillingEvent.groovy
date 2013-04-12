@@ -29,6 +29,8 @@ import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST
 @ToString(excludes = ['request', 'response'], includeNames = true, ignoreNulls = true)
 class BillingEvent {
 
+    List<BillingEvent> childs = []
+
     def data = [:]
     boolean prevented
 
@@ -40,6 +42,18 @@ class BillingEvent {
 
     def answer = [:]
 
+    BillingEvent newChild(BillingEventType type) {
+        BillingEvent be = new BillingEvent(
+            type: type,
+            platform: platform,
+            request: request,
+            response: response,
+            product: product
+        )
+        childs << be
+        return be
+    }
+
     void prevent(String message = '') {
         prevented = true
         answer SC_BAD_REQUEST, [message: message]
@@ -49,7 +63,7 @@ class BillingEvent {
         answer(HttpServletResponse.SC_OK, data)
     }
 
-    void answer(int status, data) {
+    void answer(int status, data = [:]) {
         answer = [
             status: status,
             data: data

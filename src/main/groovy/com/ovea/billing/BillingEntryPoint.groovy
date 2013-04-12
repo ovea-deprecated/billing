@@ -17,18 +17,16 @@ package com.ovea.billing
 
 import com.ovea.tadjin.util.properties.PropertySettings
 
-import java.util.logging.Level
-import java.util.logging.Logger
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.servlet.ServletConfig
 import javax.servlet.http.HttpServlet
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
+import java.util.logging.Level
+import java.util.logging.Logger
 
-import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST
-import static javax.servlet.http.HttpServletResponse.SC_NO_CONTENT
-import static javax.servlet.http.HttpServletResponse.SC_OK
+import static javax.servlet.http.HttpServletResponse.*
 
 /**
  * @author Mathieu Carbou (mathieu.carbou@gmail.com)
@@ -99,6 +97,8 @@ class BillingEntryPoint extends HttpServlet implements BillingService {
                 }
             } else if (path.startsWith('/callback/')) {
                 event = handleCallback(path, req, resp)
+            } else if (path.startsWith('/event/')) {
+                event = handleEvent(path, req, resp)
             }
             if (!resp.committed) {
                 if (event && event.answer) {
@@ -125,6 +125,32 @@ class BillingEntryPoint extends HttpServlet implements BillingService {
         connectors*.onEvent(event)
         if (!event.prevented) {
             callback.onEvent(event)
+        }
+        return event
+    }
+
+    BillingEvent handleEvent(String path, HttpServletRequest request, HttpServletResponse response) {
+        BillingEvent event = new BillingEvent(
+            type: BillingEventType.NOTIFICATION,
+            platform: path.substring(7) as BillingPlatform,
+            request: request,
+            response: response
+        )
+        // let connectors parse events and construct a batch list
+        connectors*.onEvent(event)
+        if (!event.prevented) {
+            if (event.childs) {
+                // if batches, reprocess all childs normally
+                event.childs.each { BillingEvent child ->
+                    connectors*.onEvent(child)
+                    if (!child.prevented) {
+                        callback.onEvent(child)
+                    }
+                }
+            } else {
+                // if not batches, normal behavior
+                callback.onEvent(event)
+            }
         }
         return event
     }

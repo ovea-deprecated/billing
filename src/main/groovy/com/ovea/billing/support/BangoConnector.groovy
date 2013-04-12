@@ -58,12 +58,14 @@ class BangoConnector implements BillingCallback {
                     e.data << [
                         from: e.request.remoteAddr,
                     ]
+                    LOGGER.fine("BUY_REQUESTED: " + e.data.from)
                     break
 
                 case BillingEventType.BUY_REQUEST_ACCEPTED:
                     if (!e.data.reference) {
                         throw new IllegalArgumentException('Missing reference')
                     }
+                    LOGGER.fine("BUY_REQUEST_ACCEPTED: " + e.data.reference)
                     e.answer([
                         redirect: config.getProductConfig(BillingPlatform.bango, e.product).url + "&p=${e.data.reference}"
                     ])
@@ -79,6 +81,7 @@ class BangoConnector implements BillingCallback {
                     if (!e.data.id) {
                         throw new IllegalArgumentException('Missing subscription id')
                     }
+                    LOGGER.fine("CALLBACK_REQUEST: " + e.data.reference + " - " + e.data.id)
                     e.data << status(e)
                     switch (e.data.status) {
                         case 'OK':
@@ -97,11 +100,29 @@ class BangoConnector implements BillingCallback {
                     if (!e.data.id) {
                         throw new IllegalArgumentException('Missing subscription id')
                     }
+                    LOGGER.fine("CANCEL_REQUEST_ACCEPTED: " + e.data.id)
                     e.type = BillingEventType.CANCEL_COMPLETED
                     e.data << status(e)
                     if (e.data.status == 'OK' || e.data.status == 'WAITING') {
                         e.data << cancel(e)
                     }
+                    break
+
+                case BillingEventType.NOTIFICATION:
+                    // See http://support.bango.com/attachments/token/uc9ue3hxumvvq0d/?name=EventNotification_v1.9.pdf
+                    String xml = e.request.getParameter('XML')
+                    def bangoEvents = new XmlSlurper().parseText(xml)
+                    LOGGER.fine("NOTIFICATION: " + xml)
+                    // we only check for subscription source
+                    if (bangoEvents.source.toString() == 'SUBSCRIPTION') {
+                        bangoEvents.eventList.event.each { evt ->
+                            if (evt.action.toString() in ['CANCEL', 'REVOKE']) {
+                                BillingEvent c = e.newChild(BillingEventType.CANCEL_COMPLETED)
+                                c.data.id = evt.data.item.find { i -> i.@name.toString() == 'subscriptionId' }.value
+                            }
+                        }
+                    }
+                    e.answer(200)
                     break
             }
         }
