@@ -67,7 +67,7 @@ class BangoConnector implements BillingCallback {
                         throw new IllegalArgumentException('Missing reference')
                     }
                     e.answer([
-                        redirect: config.getProductConfig(BillingPlatform.bango, e.product).url + "&=p=${e.data.reference}"
+                        redirect: config.getProductConfig(BillingPlatform.bango, e.product).url + "&p=${e.data.reference}"
                     ])
                     e.type = BillingEventType.BUY_PENDING
                     break
