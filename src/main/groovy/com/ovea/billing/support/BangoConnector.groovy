@@ -31,7 +31,6 @@ class BangoConnector implements BillingCallback {
 
     private final BillingConfig config
     private final def bango = [
-        callback: '/callback/' + BillingPlatform.bango,
         url: 'https://webservices.bango.com/subscriptions/service.asmx',
         username: '',
         password: '',
@@ -43,7 +42,6 @@ class BangoConnector implements BillingCallback {
 
     BangoConnector(BillingConfig config) {
         this.config = config
-        bango.callback = config.url + bango.callback
         def pcfg = config.getPlatformConfig(BillingPlatform.bango)
         bango.username = pcfg.username
         bango.password = pcfg.password

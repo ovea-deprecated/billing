@@ -127,6 +127,10 @@ class BillingConfig {
         return json.products[product].cancellable
     }
 
+    String getCallbackUrl(BillingPlatform platform) {
+        return url + '/callback/' + platform
+    }
+
     Collection<BillingPlatform> platforms(String product) {
         return (json.products[product].platforms ?: [:]).keySet().collect { it as BillingPlatform }
     }
