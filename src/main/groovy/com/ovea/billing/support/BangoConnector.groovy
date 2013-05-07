@@ -137,7 +137,8 @@ class BangoConnector implements BillingCallback {
         ]).toString()
         def res = IO.soapRequest(bango.url as String, req, [
             Host: 'webservices.bango.com',
-            SOAPAction: 'com.bango.webservices.subscriptions/GetSubscriptionInfo'
+            SOAPAction: 'com.bango.webservices.subscriptions/GetSubscriptionInfo',
+            'Content-Type': 'text/xml;charset=UTF-8'
         ])
         return [
             /*
@@ -165,7 +166,8 @@ class BangoConnector implements BillingCallback {
         ]).toString()
         def res = IO.soapRequest(bango.url as String, req, [
             Host: 'webservices.bango.com',
-            SOAPAction: 'com.bango.webservices.subscriptions/CancelSubscription'
+            SOAPAction: 'com.bango.webservices.subscriptions/CancelSubscription',
+            'Content-Type': 'text/xml;charset=UTF-8'
         ])
         return [
             /*
