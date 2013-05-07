@@ -17,10 +17,13 @@ package com.ovea.billing
 
 import groovy.json.JsonBuilder
 
-import java.util.logging.Level
-import java.util.logging.Logger
+import javax.net.ssl.*
 import javax.servlet.http.HttpServletResponse
 import javax.xml.ws.WebServiceException
+import java.security.SecureRandom
+import java.security.cert.X509Certificate
+import java.util.logging.Level
+import java.util.logging.Logger
 
 /**
  * @author Mathieu Carbou (mathieu.carbou@gmail.com)
@@ -44,6 +47,24 @@ class IO {
 
     static def soapRequest(String url, String request, Map<String, String> headers = [:]) throws WebServiceException {
         HttpURLConnection connection = new URL(url).openConnection() as HttpURLConnection
+        if (connection instanceof HttpsURLConnection) {
+            HttpsURLConnection httpsCon = (HttpsURLConnection) connection
+            SSLContext sc = SSLContext.getInstance("SSL")
+            sc.init(null, [new X509TrustManager() {
+                @Override
+                X509Certificate[] getAcceptedIssuers() { null }
+
+                @Override
+                void checkClientTrusted(X509Certificate[] certs, String authType) {
+                }
+
+                @Override
+                void checkServerTrusted(X509Certificate[] certs, String authType) {
+                }
+            }] as TrustManager[], new SecureRandom())
+            httpsCon.SSLSocketFactory = sc.socketFactory
+            httpsCon.hostnameVerifier = ({ true } as HostnameVerifier)
+        }
         try {
             def data = request.bytes
             connection.requestMethod = 'POST'
@@ -55,7 +76,7 @@ class IO {
             connection.setRequestProperty('Content-Length', "${data.length}")
             connection.setRequestProperty('Content-Type', "application/soap+xml;charset=UTF-8")
             connection.setRequestProperty("SOAPAction", "")
-            headers.each {k, v -> connection.setRequestProperty(k, v)}
+            headers.each { k, v -> connection.setRequestProperty(k, v) }
             connection.outputStream.bytes = data
             String response = connection.responseCode == 200 ? connection.inputStream.text : connection.errorStream.text
             if (LOGGER.isLoggable(Level.FINE)) {
@@ -69,7 +90,7 @@ class IO {
                     soapEnv = new XmlSlurper(false, true).parseText(response)
                     break
                 case 'multipart/related':
-                    response = response.readLines().find {it.startsWith('<?xml')} ?: {throw new IllegalStateException('Found no XML in repsonse ' + response)}.call()
+                    response = response.readLines().find { it.startsWith('<?xml') } ?: { throw new IllegalStateException('Found no XML in repsonse ' + response) }.call()
                     soapEnv = new XmlSlurper(false, true).parseText(response)
                     break
                 default:
