@@ -108,4 +108,23 @@ class IO {
         }
     }
 
+    /*public static void main(String[] args) {
+        String req = """<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:com="com.bango.webservices.subscriptions">
+           <soapenv:Header/>
+           <soapenv:Body>
+              <com:GetSubscriptionInfo>
+                 <com:request>
+                    <com:username>USERNAME</com:username>
+                    <com:password>PASSWORD</com:password>
+                    <com:subscriptionId>SUBID</com:subscriptionId>
+                 </com:request>
+              </com:GetSubscriptionInfo>
+           </soapenv:Body>
+        </soapenv:Envelope>"""
+        println soapRequest('https://webservices.bango.com/subscriptions/service.asmx', req, [
+            Host: 'webservices.bango.com',
+            SOAPAction: 'com.bango.webservices.subscriptions/GetSubscriptionInfo',
+            'Content-Type': 'text/xml;charset=UTF-8'
+        ]).toString()
+    }*/
 }
