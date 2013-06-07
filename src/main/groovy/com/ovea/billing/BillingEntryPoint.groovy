@@ -116,9 +116,12 @@ class BillingEntryPoint extends HttpServlet implements BillingService {
     }
 
     BillingEvent handleCallback(String path, HttpServletRequest request, HttpServletResponse response) {
+        // URI: /callback/<platform>/<product>
+        int p = path.indexOf('/', 11)
         BillingEvent event = new BillingEvent(
             type: BillingEventType.CALLBACK_REQUEST,
-            platform: path.substring(10) as BillingPlatform,
+            platform: path.substring(10, p) as BillingPlatform,
+            product: path.substring(p + 1),
             request: request,
             response: response
         )

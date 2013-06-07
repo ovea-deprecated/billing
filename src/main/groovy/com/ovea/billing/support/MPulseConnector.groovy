@@ -59,7 +59,7 @@ class MPulseConnector implements BillingCallback {
                 case BillingEventType.BUY_REQUESTED:
                     e.data << [
                         from: e.request.remoteAddr,
-                        callback: config.getCallbackUrl(BillingPlatform.mpulse)
+                        callback: config.getCallbackUrl(BillingPlatform.mpulse, e.product)
                     ]
                     break
 

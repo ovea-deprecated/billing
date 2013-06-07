@@ -127,8 +127,10 @@ class BillingConfig {
         return json.products[product].cancellable
     }
 
-    String getCallbackUrl(BillingPlatform platform) {
-        return url + '/callback/' + platform
+    String getCallbackUrl(BillingPlatform platform, String product) {
+        if(platform == null) throw new IllegalArgumentException('platform is null')
+        if(product == null) throw new IllegalArgumentException('product is null')
+        return url + '/callback/' + platform + '/' + product
     }
 
     Collection<BillingPlatform> platforms(String product) {
