@@ -76,9 +76,9 @@ class BangoConnector implements BillingCallback {
 
                     if (e.request.getParameter('errorCode')) {
                         throw new IllegalStateException("Billing error: message => " + e.request.getParameter('errorMessage')
-                                + " payement method => " + e.request.getParameter('paymentMethodId')
-                                + " payement type => " + e.request.getParameter('paymentMethodType')
-                                + " network => " + e.request.getParameter("networkId"));
+                            + " payement method => " + e.request.getParameter('paymentMethodId')
+                            + " payement type => " + e.request.getParameter('paymentMethodType')
+                            + " network => " + e.request.getParameter("networkId"));
                     }
 
                     e.data << [
@@ -170,7 +170,9 @@ class BangoConnector implements BillingCallback {
 
     def cancel(BillingEvent e) {
         def req = bango.tmpl.cancel.make([
-            event: e
+            event: e,
+            username: bango.username,
+            password: bango.password,
         ]).toString()
         def res = IO.soapRequest(bango.url as String, req, [
             Host: 'webservices.bango.com',
