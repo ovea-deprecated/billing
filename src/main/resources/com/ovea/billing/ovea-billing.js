@@ -72,13 +72,13 @@
                         platform:opts.using
                     },
                     success:function (data) {
-                        if (data.error) {
+                        if (data && data.error) {
                             trigger('buy.error', {
                                 message:data.error,
                                 product:opts.product,
                                 platform:opts.using
                             });
-                        } else if (data.redirect) {
+                        } else if (data && data.redirect) {
                             trigger('buy.redirect', {
                                 url:data.redirect,
                                 action:'buy',
@@ -114,12 +114,12 @@
                         product:opts.product
                     },
                     success:function (data) {
-                        if (data.error) {
+                        if (data && data.error) {
                             trigger('cancel.error', {
                                 message:data.error,
                                 product:opts.product
                             });
-                        } else if (data.redirect) {
+                        } else if (data && data.redirect) {
                             trigger('cancel.redirect', {
                                 url:data.redirect,
                                 action:'cancel',
