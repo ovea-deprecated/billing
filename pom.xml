@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>ovea-billing</artifactId>
-    <version>1.0.b9</version>
+    <version>1.0.b10-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>ovea-billing</name>
@@ -23,7 +23,7 @@
         <connection>scm:git:git@github.com:Ovea/billing.git</connection>
         <developerConnection>scm:git:git@github.com:Ovea/billing.git</developerConnection>
         <url>http://github.com/Ovea/billing</url>
-      <tag>ovea-billing-1.0.b9</tag>
+      <tag>HEAD</tag>
   </scm>
 
     <build>
